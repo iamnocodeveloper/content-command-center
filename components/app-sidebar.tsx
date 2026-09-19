@@ -13,7 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-const HANDLE = "@tenfoldmarc";
+const HANDLE = "@nocodeveloper";
+const AUTHOR = "Joel Araujo";
 
 function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -61,14 +62,14 @@ function BrandBlock() {
   return (
     <Link href="/hooks" className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sidebar-accent/50">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary ring-1 ring-primary/30">
-        TM
+        NC
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold tracking-tight text-sidebar-foreground">
           {HANDLE}
         </span>
         <span className="block truncate text-xs text-muted-foreground">
-          Content Command Center
+          {AUTHOR}
         </span>
       </span>
     </Link>

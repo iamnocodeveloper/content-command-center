@@ -8,6 +8,8 @@
 
 Construido sobre la [API de Zernio](https://docs.zernio.com) · Next.js 15 · TypeScript · Tailwind · shadcn/ui · modo oscuro con acentos terracota
 
+**por [nocodeveloper · Joel Araujo](https://github.com/iamnocodeveloper)**
+
 <br/>
 
 [![CI](https://github.com/iamnocodeveloper/content-command-center/actions/workflows/ci.yml/badge.svg)](https://github.com/iamnocodeveloper/content-command-center/actions/workflows/ci.yml)
@@ -283,11 +285,46 @@ scripts/                    ingesta manual por CLI
 
 ---
 
+## 👤 Autor
+
+**nocodeveloper · Joel Araujo**
+
+Construí esto para organizar mi propio contenido y lo dejo abierto por si te sirve.
+
+[![GitHub](https://img.shields.io/badge/GitHub-iamnocodeveloper-18181b?style=flat-square&logo=github&logoColor=white)](https://github.com/iamnocodeveloper)
+
+<!-- 🌐 Sitio web: añade aquí tu URL cuando la tengas -->
+
+---
+
+## ☕ Invítame un café… o una birra 🍺
+
+El proyecto es open source y sin ánimo de lucro. Si te ahorra tiempo cada semana, puedes invitarme a un café — o directamente a una birra, que también se agradece 😄
+
+<div align="center">
+
+[![PayPal](https://img.shields.io/badge/PayPal-Inv%C3%ADtame%20una%20birra%20%F0%9F%8D%BA-0070ba?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/nocodeship2024?locale.x=es_XC&country.x=EC)
+[![Binance](https://img.shields.io/badge/Binance%20Pay-joeldavidar%40gmail.com-f0b90b?style=for-the-badge&logo=binance&logoColor=white)](https://www.binance.com/es/pay)
+
+**Binance Pay** → `joeldavidar@gmail.com`
+
+**PayPal** → [paypal.me/nocodeship2024](https://paypal.me/nocodeship2024?locale.x=es_XC&country.x=EC)
+
+</div>
+
+---
+
 ## 📄 Licencia
 
-[MIT](./LICENSE) © 2026 tenfoldmarc
+[MIT](./LICENSE) © 2026 nocodeveloper · Joel Araujo
 
 <div align="center">
 <br/>
+<img src="./docs/assets/hero.svg" alt="Content Command Center" width="420"/>
+<br/><br/>
+<sub><b>nocodeveloper · Joel Araujo</b></sub>
+<br/>
 <sub>Construido con <a href="https://docs.zernio.com">la API de Zernio</a> · 16 plataformas, una sola API</sub>
+<br/>
+<sub>Si te sirvió, <a href="https://paypal.me/nocodeship2024?locale.x=es_XC&country.x=EC">invítame una birra 🍺</a></sub>
 </div>

@@ -77,11 +77,11 @@ export default function OpengraphImage() {
               fontFamily: "monospace",
             }}
           >
-            TM
+            NC
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ color: "#e9d9d2", fontSize: 26, fontWeight: 600 }}>
-              @tenfoldmarc
+              @nocodeveloper
             </div>
             <div
               style={{

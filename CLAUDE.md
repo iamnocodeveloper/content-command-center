@@ -9,7 +9,7 @@ descartada. Si vas a tocar código, empieza por aquí.
 ## 1. Qué es
 
 **Content Command Center**: dashboard de contenido para un creador
-(@tenfoldmarc) construido sobre la **API de Zernio**
+(@nocodeveloper) construido sobre la **API de Zernio**
 (https://docs.zernio.com). Cubre seis secciones:
 
 | # | Sección | Ruta | Fuente de datos |
@@ -67,7 +67,7 @@ app/
   globals.css                     # tokens de diseño (HSL) + utilidades
   page.tsx                        # redirige a /hooks
   (dashboard)/
-    layout.tsx                    # shell: sidebar @tenfoldmarc + main
+    layout.tsx                    # shell: sidebar @nocodeveloper + main
     hooks|analytics|competitors|scheduler|calendar|trends|script|settings/page.tsx
   api/
     status, hooks, hooks/[id], analytics, accounts, competitors,

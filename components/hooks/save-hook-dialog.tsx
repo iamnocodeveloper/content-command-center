@@ -41,7 +41,7 @@ export function SaveHookDialog() {
   const [saving, setSaving] = React.useState(false);
   const [rawText, setRawText] = React.useState("");
   const [onScreenText, setOnScreenText] = React.useState("");
-  const [creatorHandle, setCreatorHandle] = React.useState("@tenfoldmarc");
+  const [creatorHandle, setCreatorHandle] = React.useState("@nocodeveloper");
   const [creatorPlatform, setCreatorPlatform] = React.useState("instagram");
   const [views, setViews] = React.useState("0");
   const [sourceUrl, setSourceUrl] = React.useState("");
@@ -68,7 +68,7 @@ export function SaveHookDialog() {
         body: JSON.stringify({
           rawText: rawText.trim(),
           onScreenText: onScreenText.trim() || undefined,
-          creatorHandle: creatorHandle.trim() || "@tenfoldmarc",
+          creatorHandle: creatorHandle.trim() || "@nocodeveloper",
           creatorPlatform,
           views: Number(views) || 0,
           sourceUrl: sourceUrl.trim() || undefined,

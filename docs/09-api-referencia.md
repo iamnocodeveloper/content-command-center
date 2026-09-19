@@ -22,8 +22,8 @@ Estado de la integración y cuentas conectadas.
   "source": "demo",
   "warning": null,
   "accounts": [
-    { "id": "acc_ig_main", "platform": "instagram", "username": "tenfoldmarc",
-      "displayName": "Marc · tenfoldmarc", "isActive": true, "followerCount": 41280 }
+    { "id": "acc_ig_main", "platform": "instagram", "username": "nocodeveloper",
+      "displayName": "Joel Araujo · nocodeveloper", "isActive": true, "followerCount": 41280 }
   ]
 }
 ```
@@ -121,7 +121,7 @@ límite).
 ```json
 { "hooks": [ { "id": "hook_…", "rawText": "…", "templateText": "[X]…",
   "patternId": "callout-destroy", "type": "callout", "niche": "marketing",
-  "views": 1284000, "tier": "viral", "creatorHandle": "@tenfoldmarc", "isFavorite": true } ],
+  "views": 1284000, "tier": "viral", "creatorHandle": "@nocodeveloper", "isFavorite": true } ],
   "count": 22 }
 ```
 
@@ -134,7 +134,7 @@ Crea un hook: el motor lo clasifica y lo convierte en plantilla.
   "rawText": "3 errores que te cuestan clientes cada semana",  // requerido, ≥4
   "onScreenText": "3 ERRORES QUE TE CUESTAN CLIENTES",
   "views": 250000, "likes": 18000, "saves": 5200,
-  "creatorHandle": "@tenfoldmarc",           // requerido
+  "creatorHandle": "@nocodeveloper",           // requerido
   "creatorPlatform": "instagram",            // requerido
   "sourceUrl": "https://instagram.com/reel/…",
   "sourceReelId": "reel_cl001",

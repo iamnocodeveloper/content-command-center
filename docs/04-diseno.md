@@ -97,7 +97,7 @@ Primitivos shadcn/ui (estilo *new-york*) copiados al repo en `components/ui/`:
 
 | Componente | Papel |
 |---|---|
-| `app-sidebar` | Barra lateral con **@tenfoldmarc** arriba, las 6 secciones, las 2 de apoyo, el estado de Zernio y el conmutador de tema. En móvil se convierte en `Sheet`. |
+| `app-sidebar` | Barra lateral con **@nocodeveloper** arriba, las 6 secciones, las 2 de apoyo, el estado de Zernio y el conmutador de tema. En móvil se convierte en `Sheet`. |
 | `page-header` | Cabecera con `eyebrow` («Sección 2»), título, descripción y acciones. Lleva el degradado `brand-glow`. |
 | `stat-card` | KPI con valor, delta con flecha e sparkline SVG propia (sin librería). |
 | `empty-state` | Estado vacío consistente: icono, título, explicación y acción. |
@@ -109,8 +109,8 @@ Primitivos shadcn/ui (estilo *new-york*) copiados al repo en `components/ui/`:
 
 - 272 px fijos en `lg+`, pegada arriba (`sticky`) para que no se desplace con el
   contenido.
-- **Cabecera**: avatar con iniciales `TM` sobre `bg-primary/15`, el handle
-  `@tenfoldmarc` y el subtítulo «Content Command Center».
+- **Cabecera**: avatar con iniciales `NC` sobre `bg-primary/15`, el handle
+  `@nocodeveloper` y el nombre «Joel Araujo».
 - Cada entrada muestra **etiqueta + descripción corta**: en un panel de seis
   secciones con nombres largos, la descripción evita tener que entrar para
   recordar qué hace cada una.

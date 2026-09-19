@@ -50,7 +50,7 @@ export default function Icon() {
             fontFamily: "monospace",
           }}
         >
-          TM
+          NC
         </div>
       </div>
     ),

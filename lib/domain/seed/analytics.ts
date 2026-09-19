@@ -362,9 +362,9 @@ export function createDemoPosts(): PostAnalyticsEntry[] {
 }
 
 const accountSeed = [
-  { accountId: "acc_ig_main", platform: "instagram" as const, username: "tenfoldmarc", start: 38_400, days: 180 },
-  { accountId: "acc_tt_main", platform: "tiktok" as const, username: "tenfoldmarc", start: 21_900, days: 150 },
-  { accountId: "acc_yt_main", platform: "youtube" as const, username: "@tenfoldmarc", start: 9_200, days: 120 },
+  { accountId: "acc_ig_main", platform: "instagram" as const, username: "nocodeveloper", start: 38_400, days: 180 },
+  { accountId: "acc_tt_main", platform: "tiktok" as const, username: "nocodeveloper", start: 21_900, days: 150 },
+  { accountId: "acc_yt_main", platform: "youtube" as const, username: "@nocodeveloper", start: 9_200, days: 120 },
 ];
 
 export function createDemoFollowerStats(): FollowerStatsResponse {
