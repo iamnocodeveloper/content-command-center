@@ -242,6 +242,29 @@ semántica descartando muletillas de apertura («hola», «en este video»…). 
 proveedor por defecto es `mock`, que genera una transcripción plausible para que
 la demo funcione sin coste.
 
+### 4.14 Atribución de autoría protegida por el build
+
+El pie de la barra lateral muestra el crédito `© por Joel Araujo · Nocodeveloper`
+(constante `COPYRIGHT` en `components/app-sidebar.tsx`).
+
+`scripts/verify-attribution.mjs` lo verifica en dos momentos y **falla el build**
+si desaparece:
+
+- `prebuild` → comprueba que la constante existe, que se renderiza con
+  `{COPYRIGHT}` y que el icono `Heart` está importado y usado.
+- `postbuild` → comprueba que la cadena completa viaja dentro de `.next/static`.
+
+Decisión: el chequeo del bundle exige la **cadena completa**, no fragmentos. Si
+sólo se buscara `"Joel Araujo"` daría un falso positivo, porque la cabecera del
+sidebar también muestra el nombre. Como el bundler escapa `©` y `·` a `\xa9` y
+`\xb7`, el verificador genera las tres representaciones posibles.
+
+Límite explícito: esto **no hace el crédito imposible de borrar** — es código
+abierto bajo MIT y cualquiera puede editar el archivo y el script. Lo que
+consigue es que quitarlo sea deliberado y visible, y que *este* proyecto no pueda
+desplegarse sin él. Para exigibilidad legal habría que cambiar la licencia. Ver
+`docs/11-atribucion.md`.
+
 ---
 
 ## 5. Comandos

@@ -250,6 +250,7 @@ Guía completa, cron en UTC y solución de problemas: [`docs/08-despliegue.md`](
 | [`docs/08-despliegue.md`](./docs/08-despliegue.md) | Local, Docker, Vercel y problemas frecuentes. |
 | [`docs/09-api-referencia.md`](./docs/09-api-referencia.md) | Referencia de los 18 endpoints propios. |
 | [`docs/10-publicar-en-github.md`](./docs/10-publicar-en-github.md) | Publicar el repo, revisión de seguridad previa y checklist posterior. |
+| [`docs/11-atribucion.md`](./docs/11-atribucion.md) | El crédito de autoría del sidebar y el verificador que impide quitarlo sin romper el build. |
 
 ---
 

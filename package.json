@@ -5,11 +5,15 @@
   "description": "Content Command Center - dashboard de contenido para creadores, potenciado por la API de Zernio.",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/verify-attribution.mjs",
     "build": "next build",
+    "postbuild": "node scripts/verify-attribution.mjs --dist",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint",
+    "verify:attribution": "node scripts/verify-attribution.mjs",
+    "verify:svg": "node scripts/validate-svg.mjs docs/assets/hero.svg docs/assets/secciones.svg",
+    "check": "npm run typecheck && npm run lint && npm run verify:attribution && npm run verify:svg",
     "ingest:trends": "tsx scripts/ingest-trends.ts",
     "ingest:competitors": "tsx scripts/ingest-competitors.ts"
   },

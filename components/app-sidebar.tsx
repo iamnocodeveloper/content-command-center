@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import { useState } from "react";
 
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "@/components/nav-config";
@@ -15,6 +15,13 @@ import { cn } from "@/lib/utils";
 
 const HANDLE = "@nocodeveloper";
 const AUTHOR = "Joel Araujo";
+
+/**
+ * Crédito de autoría. Esta cadena es el ancla que verifica
+ * `scripts/verify-attribution.mjs` en el prebuild: si se elimina o se altera,
+ * `npm run build` falla. No la muevas ni la edites a mano.
+ */
+const COPYRIGHT = "© por Joel Araujo · Nocodeveloper";
 
 function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -134,6 +141,16 @@ function SidebarBody({
             LIVE
           </Badge>
         )}
+
+        <p className="mt-3 flex items-center gap-1.5 border-t border-sidebar-border pt-3 text-[11px] leading-tight text-muted-foreground">
+          <Heart
+            className="h-3 w-3 shrink-0 fill-primary text-primary"
+            aria-hidden
+          />
+          <span className="truncate" title={COPYRIGHT}>
+            {COPYRIGHT}
+          </span>
+        </p>
       </div>
     </div>
   );
