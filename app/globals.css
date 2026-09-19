@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens del Content Command Center.
+ * Modo oscuro cálido como experiencia por defecto, con terracota como acento.
+ * Los valores están en HSL sin envolver para poder usarlos con hsl(var(--x)).
+ */
+@layer base {
+  :root {
+    /* --- Superficies (claro) --- */
+    --background: 30 20% 98%;
+    --foreground: 20 14% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 12%;
+
+    /* --- Marca (terracota) --- */
+    --primary: 16 55% 50%;
+    --primary-foreground: 30 30% 98%;
+
+    --secondary: 24 12% 94%;
+    --secondary-foreground: 20 14% 16%;
+
+    --muted: 24 12% 94%;
+    --muted-foreground: 22 8% 45%;
+
+    --accent: 18 60% 95%;
+    --accent-foreground: 16 60% 32%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 55% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 85% 46%;
+    --warning-foreground: 30 40% 12%;
+
+    --border: 24 12% 88%;
+    --input: 24 12% 88%;
+    --ring: 16 55% 50%;
+
+    --radius: 0.75rem;
+
+    /* --- Sidebar (claro) --- */
+    --sidebar: 30 18% 96%;
+    --sidebar-foreground: 20 14% 20%;
+    --sidebar-border: 24 12% 88%;
+    --sidebar-accent: 18 55% 93%;
+    --sidebar-accent-foreground: 16 60% 30%;
+
+    /* --- Series de gráficas --- */
+    --chart-1: 16 55% 50%;
+    --chart-2: 28 70% 58%;
+    --chart-3: 42 72% 55%;
+    --chart-4: 190 45% 45%;
+    --chart-5: 280 35% 55%;
+  }
+
+  .dark {
+    /* --- Superficies (oscuro cálido) --- */
+    --background: 24 12% 6%;
+    --foreground: 30 15% 94%;
+
+    --card: 24 12% 9%;
+    --card-foreground: 30 15% 94%;
+
+    --popover: 24 13% 11%;
+    --popover-foreground: 30 15% 94%;
+
+    /* --- Marca (terracota, aclarada para contraste AA en oscuro) --- */
+    --primary: 16 62% 56%;
+    --primary-foreground: 24 20% 8%;
+
+    --secondary: 24 10% 15%;
+    --secondary-foreground: 30 15% 92%;
+
+    --muted: 24 10% 15%;
+    --muted-foreground: 26 10% 62%;
+
+    --accent: 16 30% 18%;
+    --accent-foreground: 20 70% 78%;
+
+    --destructive: 0 62% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 45% 45%;
+    --success-foreground: 150 40% 8%;
+
+    --warning: 38 80% 55%;
+    --warning-foreground: 30 45% 10%;
+
+    --border: 24 10% 17%;
+    --input: 24 10% 19%;
+    --ring: 16 62% 56%;
+
+    /* --- Sidebar (oscuro) --- */
+    --sidebar: 24 13% 8%;
+    --sidebar-foreground: 30 12% 88%;
+    --sidebar-border: 24 10% 15%;
+    --sidebar-accent: 16 28% 16%;
+    --sidebar-accent-foreground: 20 70% 80%;
+
+    /* --- Series de gráficas --- */
+    --chart-1: 16 62% 56%;
+    --chart-2: 28 72% 62%;
+    --chart-3: 42 75% 58%;
+    --chart-4: 190 50% 50%;
+    --chart-5: 280 40% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+
+  /* Scrollbar discreto acorde al tema */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+}
+
+@layer components {
+  /* Tarjeta con elevación sutil y borde cálido */
+  .surface {
+    @apply rounded-lg border border-border bg-card;
+  }
+
+  /* Etiqueta de acento terracota */
+  .accent-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary;
+  }
+
+  /* Degradado de marca usado en cabeceras */
+  .brand-glow {
+    background-image: radial-gradient(
+      60% 80% at 20% 0%,
+      hsl(var(--primary) / 0.16) 0%,
+      transparent 70%
+    );
+  }
+}

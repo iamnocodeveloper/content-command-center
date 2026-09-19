@@ -1,0 +1,23 @@
+# Normaliza los finales de línea en el repositorio.
+# Sin esto, Windows introduce CRLF y el CI de Linux ve archivos distintos.
+* text=auto eol=lf
+
+# Scripts de shell que deben conservar LF obligatoriamente
+*.sh text eol=lf
+
+# Binarios: sin conversión
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Archivos que Git debe tratar como texto aunque contengan muchas líneas largas
+*.svg text eol=lf diff
+*.md text eol=lf
+
+# Los lockfiles se generan una vez y no se deben fusionar a mano
+package-lock.json -diff linguist-generated=true
