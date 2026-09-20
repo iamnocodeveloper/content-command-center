@@ -145,6 +145,18 @@ competidores, tendencias ni el plan de contenido. Esos viven en
 Toda la API del repositorio es **asíncrona a propósito**: migrar a Postgres no
 obliga a tocar ni un llamador.
 
+**Excepción: las cuentas vigiladas.** La lista de cuentas del Seguimiento de
+competidores no es dato derivado, es **configuración** que eliges tú a mano, así
+que se persiste en `.data/competitors.json` (permisos `0600`) con el mismo
+criterio que las credenciales de 4.5. Los Reels ingeridos sí siguen en memoria.
+
+**El material de demostración de competidores (8 cuentas + 40 Reels) sólo se
+siembra en modo demo.** En producción la lista arranca vacía y la llenas tú
+desde la propia página; las rutas de alta y baja devuelven `409` en demo, para
+que no exista una escritura invisible que no se ve en pantalla. Motivo: antes se
+sembraban siempre, así que en producción aparecían 8 cuentas ajenas que no se
+podían quitar.
+
 ### 4.3 Motor de hooks determinista (sin LLM)
 
 `lib/domain/hook-engine.ts` clasifica cualquier texto libre contra 14 plantillas

@@ -223,11 +223,17 @@ existente (idempotente).
   "displayName": "Nueva", "followerCount": 120000, "niche": "marketing" }
 ```
 
-`201 { competitor }`. Idempotente por `(username, platform)`.
+`201 { competitor, persisted }`. Idempotente por `(username, platform)`:
+repetir el alta devuelve la cuenta existente. `persisted: false` significa que el
+disco es efímero y la cuenta sólo vive en memoria.
+
+En **modo demo** devuelve `409`: la lista es la muestra fija de 8 cuentas y no se
+edita.
 
 ### `DELETE /api/competitors/{id}`
 
-Elimina la cuenta **y sus reels** (cascade). `200 { ok: true }` · `404`.
+Elimina la cuenta **y sus reels** (cascade). `200 { ok: true }` · `404` · `409`
+en modo demo.
 
 ### `POST /api/competitors/reels/{id}/save`
 

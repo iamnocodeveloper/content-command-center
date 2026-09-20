@@ -62,7 +62,9 @@ y la mejor cifra que ha alcanzado en la cuenta.
 
 ### 3. Seguimiento de Competidores (`/competitors`)
 
-- **8 cuentas** vigiladas, agrupadas por nicho.
+- En la muestra de demostración, **8 cuentas** vigiladas agrupadas por nicho. En
+  producción eliges tú las cuentas y quedan guardadas en
+  `.data/competitors.json`.
 - Cada domingo a las 06:00 se leen los **5 Reels con mejor rendimiento** de cada
   una, se **transcribe el audio** y se extraen el **hook hablado** y el **texto
   en pantalla**.

@@ -1,13 +1,19 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   BookmarkPlus,
   Check,
   ExternalLink,
+  Info,
+  Loader2,
+  Plus,
   Radar,
   Search,
+  Trash2,
+  UserPlus,
   Users,
 } from "lucide-react";
 
@@ -33,9 +39,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import type {
-  CompetitorAccount,
-  CompetitorReel,
+import {
+  NICHE_LABELS,
+  NICHES,
+  type CompetitorAccount,
+  type CompetitorReel,
+  type Niche,
 } from "@/lib/domain/types";
 import { formatCompact, formatNumber } from "@/lib/utils";
 
@@ -43,15 +52,29 @@ export interface ReelWithAccount extends CompetitorReel {
   account?: CompetitorAccount;
 }
 
+/** Plataformas que tiene sentido vigilar en este panel. */
+const TRACKABLE_PLATFORMS = [
+  "instagram",
+  "tiktok",
+  "youtube",
+  "facebook",
+  "linkedin",
+  "twitter",
+  "threads",
+] as const;
+
 export function CompetitorTracker({
   competitors,
   reels,
   weeks,
+  demo,
 }: {
   competitors: CompetitorAccount[];
   reels: ReelWithAccount[];
   weeks: string[];
+  demo: boolean;
 }) {
+  const router = useRouter();
   const [week, setWeek] = React.useState(weeks[0] ?? "all");
   const [accountId, setAccountId] = React.useState("all");
   const [platform, setPlatform] = React.useState("all");
@@ -59,6 +82,15 @@ export function CompetitorTracker({
   const [saved, setSaved] = React.useState<Record<string, boolean>>({});
   const [saving, setSaving] = React.useState<string | null>(null);
   const [selected, setSelected] = React.useState<ReelWithAccount | null>(null);
+
+  // Gestión de las cuentas vigiladas (sólo en producción: en demo la lista es
+  // la muestra fija y el formulario ni se muestra).
+  const [adding, setAdding] = React.useState(false);
+  const [removing, setRemoving] = React.useState<string | null>(null);
+  const [newUsername, setNewUsername] = React.useState("");
+  const [newPlatform, setNewPlatform] = React.useState("instagram");
+  const [newNiche, setNewNiche] = React.useState<Niche>("marketing");
+  const [newFollowers, setNewFollowers] = React.useState("");
 
   const platforms = React.useMemo(
     () => [...new Set(reels.map((r) => r.platform))].sort(),
@@ -101,6 +133,84 @@ export function CompetitorTracker({
     }
   }
 
+  async function addAccount(event: React.FormEvent) {
+    event.preventDefault();
+
+    const username = newUsername.trim();
+    if (username.length < 2) {
+      toast.error("Escribe un usuario válido");
+      return;
+    }
+
+    setAdding(true);
+    try {
+      const response = await fetch("/api/competitors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          platform: newPlatform,
+          niche: newNiche,
+          ...(newFollowers.trim()
+            ? { followerCount: Number(newFollowers) }
+            : {}),
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+        competitor?: CompetitorAccount;
+        persisted?: boolean;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "No se pudo añadir la cuenta");
+      }
+
+      setNewUsername("");
+      setNewFollowers("");
+      toast.success(
+        `${payload?.competitor?.username ?? username} está en seguimiento`,
+        {
+          description:
+            payload?.persisted === false
+              ? "No se pudo escribir en disco: la cuenta queda sólo en memoria."
+              : "Se analizará en la próxima ingesta de los domingos.",
+        },
+      );
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function removeAccount(account: CompetitorAccount) {
+    setRemoving(account.id);
+    try {
+      const response = await fetch(`/api/competitors/${account.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "No se pudo dejar de seguir la cuenta");
+      }
+      toast.success(`${account.username} fuera del seguimiento`);
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
+    } finally {
+      setRemoving(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -113,6 +223,155 @@ export function CompetitorTracker({
           value={week === "all" ? "Todas" : week}
         />
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <UserPlus className="h-4 w-4 text-primary" />
+            Cuentas que sigues
+          </CardTitle>
+          {demo ? (
+            <Badge variant="warning">Muestra de demostración</Badge>
+          ) : (
+            <Badge variant="muted">
+              {formatNumber(competitors.length)} en seguimiento
+            </Badge>
+          )}
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {demo
+              ? "En modo demo esta lista es una muestra fija de 8 cuentas y no se edita. Conecta Zernio en Ajustes para pasar a datos en vivo y elegir tú las cuentas."
+              : "Añade las cuentas que quieres vigilar. Cada domingo a las 06:00 se analizan sus 5 Reels con mejor rendimiento."}
+          </p>
+
+          {competitors.length === 0 ? (
+            <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                Todavía no sigues ninguna cuenta. Añade la primera con el
+                formulario de abajo.
+              </span>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border rounded-md border border-border">
+              {competitors.map((account) => (
+                <li
+                  key={account.id}
+                  className="flex flex-wrap items-center gap-3 p-3"
+                >
+                  <PlatformIcon platform={account.platform} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {account.username}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {account.displayName} ·{" "}
+                      {formatCompact(account.followerCount)} seguidores ·{" "}
+                      {NICHE_LABELS[account.niche]} · {platformLabel(account.platform)}
+                    </p>
+                  </div>
+                  {demo ? null : (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Dejar de seguir a ${account.username}`}
+                      disabled={removing === account.id}
+                      onClick={() => removeAccount(account)}
+                    >
+                      {removing === account.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {demo ? null : (
+            <form onSubmit={addAccount} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+                <Label htmlFor="competitor-username" className="text-xs text-muted-foreground">
+                  Usuario
+                </Label>
+                <Input
+                  id="competitor-username"
+                  value={newUsername}
+                  onChange={(event) => setNewUsername(event.target.value)}
+                  placeholder="@creador"
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="font-mono text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Plataforma</Label>
+                <Select value={newPlatform} onValueChange={setNewPlatform}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TRACKABLE_PLATFORMS.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {platformLabel(item)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Nicho</Label>
+                <Select
+                  value={newNiche}
+                  onValueChange={(value) => setNewNiche(value as Niche)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NICHES.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {NICHE_LABELS[item]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="competitor-followers" className="text-xs text-muted-foreground">
+                  Seguidores (opcional)
+                </Label>
+                <Input
+                  id="competitor-followers"
+                  value={newFollowers}
+                  onChange={(event) => setNewFollowers(event.target.value)}
+                  placeholder="0"
+                  inputMode="numeric"
+                  className="font-mono text-xs"
+                />
+              </div>
+
+              <div className="sm:col-span-2 lg:col-span-4">
+                <Button type="submit" size="sm" disabled={adding}>
+                  {adding ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                  Añadir al seguimiento
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-4">
@@ -195,8 +454,16 @@ export function CompetitorTracker({
       {filtered.length === 0 ? (
         <EmptyState
           icon={Radar}
-          title="Sin reels para estos filtros"
-          description="Cambia la semana o el creador. Los resultados se recopilan automáticamente cada domingo."
+          title={
+            competitors.length === 0 && !demo
+              ? "Ninguna cuenta en seguimiento"
+              : "Sin reels para estos filtros"
+          }
+          description={
+            competitors.length === 0 && !demo
+              ? "Añade arriba las cuentas que quieres vigilar. La ingesta de los domingos a las 06:00 analizará sus 5 mejores Reels."
+              : "Cambia la semana o el creador. Los resultados se recopilan automáticamente cada domingo."
+          }
         />
       ) : (
         <div className="space-y-3">

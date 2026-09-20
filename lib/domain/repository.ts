@@ -2,6 +2,12 @@ import { buildHook } from "@/lib/domain/hook-engine";
 import { createSeedCompetitors, SEED_REELS } from "@/lib/domain/seed/competitors";
 import { SEED_HOOKS } from "@/lib/domain/seed/hooks";
 import { SEED_TRENDS, TREND_SOURCES } from "@/lib/domain/seed/trends";
+import {
+  addTrackedAccount,
+  readTrackedAccounts,
+  removeTrackedAccount,
+} from "@/lib/server/competitors-store";
+import { isDemoMode } from "@/lib/zernio/config";
 import type {
   CompetitorAccount,
   CompetitorReel,
@@ -35,10 +41,16 @@ interface Store {
 const GLOBAL_KEY = "__ccc_store__";
 
 function createInitialStore(): Store {
+  // El material de demostración de competidores sólo existe en modo demo. En
+  // producción la lista de cuentas la pones tú (y se persiste), mientras que
+  // los reels los traería la ingesta real, todavía sin implementar: ver
+  // docs/06-integraciones.md.
+  const demo = isDemoMode();
+
   return {
     hooks: SEED_HOOKS.map((h) => ({ ...h })),
-    competitors: createSeedCompetitors().map((c) => ({ ...c })),
-    reels: SEED_REELS.map((r) => ({ ...r })),
+    competitors: demo ? createSeedCompetitors().map((c) => ({ ...c })) : [],
+    reels: demo ? SEED_REELS.map((r) => ({ ...r })) : [],
     trends: SEED_TRENDS.map((t) => ({ ...t })),
     plan: [],
     seededAt: new Date().toISOString(),
@@ -198,8 +210,22 @@ export async function deleteHook(id: string): Promise<boolean> {
 // Competidores
 // ---------------------------------------------------------------------------
 
+/**
+ * Cuentas vigiladas.
+ *
+ * En demo es la muestra fija de 8 cuentas (sólo lectura, no se persiste). En
+ * producción es la lista que gestionas tú desde la página de Competidores,
+ * persistida en `.data/competitors.json`.
+ */
 export async function listCompetitors(): Promise<CompetitorAccount[]> {
-  return getStore().competitors.slice();
+  if (isDemoMode()) return getStore().competitors.slice();
+  return readTrackedAccounts().slice();
+}
+
+export interface AddCompetitorResult {
+  competitor: CompetitorAccount;
+  /** false si el disco no admitió la escritura (sistema de archivos efímero). */
+  persisted: boolean;
 }
 
 export async function addCompetitor(input: {
@@ -208,38 +234,20 @@ export async function addCompetitor(input: {
   displayName?: string;
   followerCount?: number;
   niche?: Niche;
-}): Promise<CompetitorAccount> {
-  const store = getStore();
-  const existing = store.competitors.find(
-    (c) =>
-      c.username.toLowerCase() === input.username.toLowerCase() &&
-      c.platform === input.platform,
-  );
-  if (existing) return existing;
-
-  const competitor: CompetitorAccount = {
-    id: `cmp_${Date.now().toString(36)}`,
-    platform: input.platform,
-    username: input.username.startsWith("@")
-      ? input.username
-      : `@${input.username}`,
-    displayName: input.displayName ?? input.username.replace(/^@/, ""),
-    followerCount: input.followerCount ?? 0,
-    niche: input.niche ?? "marketing",
-    isActive: true,
-    addedAt: new Date().toISOString(),
-  };
-
-  store.competitors.push(competitor);
-  return competitor;
+}): Promise<AddCompetitorResult> {
+  const { value, persisted } = addTrackedAccount(input);
+  return { competitor: value, persisted };
 }
 
 export async function removeCompetitor(id: string): Promise<boolean> {
+  const { found } = removeTrackedAccount(id);
+  if (!found) return false;
+
+  // En demo los reels viven en memoria; se descartan junto con la cuenta.
   const store = getStore();
-  const before = store.competitors.length;
-  store.competitors = store.competitors.filter((c) => c.id !== id);
-  store.reels = store.reels.filter((r) => r.accountId !== id);
-  return store.competitors.length < before;
+  store.reels = store.reels.filter((reel) => reel.accountId !== id);
+  store.competitors = store.competitors.filter((account) => account.id !== id);
+  return true;
 }
 
 export interface ReelQuery {

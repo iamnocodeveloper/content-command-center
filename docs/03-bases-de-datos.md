@@ -16,7 +16,7 @@ cosa hoy y cómo migrar a Postgres cuando haga falta.
 | Métricas y series diarias | En memoria, vía gateway | **Zernio** (`GET /v1/analytics`) |
 | Seguidores | En memoria, vía gateway | **Zernio** (`/v1/accounts/follower-stats`) |
 | Hooks guardados | Store en memoria | **Local** |
-| Cuentas competidoras | Store en memoria | **Local** |
+| Cuentas competidoras | `DATA_DIR/competitors.json` (0600) | **Local** |
 | Reels de competidores + transcripciones | Store en memoria | **Local** |
 | Noticias de tendencias + scores | Store en memoria | **Local** |
 | Plan de contenido del mes | Store en memoria | **Local** |

@@ -163,7 +163,7 @@ porque el pipeline real todavía no está implementado. Para conectarlo de verda
 los pasos (ya enumerados en `app/api/cron/competitors/route.ts`) son:
 
 ```
-1. GET /v1/accounts                              → resolver accountIds de las 8 cuentas
+1. GET /v1/accounts                              → resolver accountIds de las cuentas vigiladas
 2. GET /v1/accounts/{accountId}/posts            → los 25 posts nativos más recientes
 3. GET /v1/analytics?postId={id}&platform=       → métricas de cada uno
 4. ordenar por views y quedarse con el top 5     → por cuenta
