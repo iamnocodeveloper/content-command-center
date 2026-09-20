@@ -114,9 +114,20 @@ docs/                             # documentación funcional y técnica
 `lib/domain/zernio-gateway.ts` es la **única** puerta a Zernio desde la UI.
 Cada función devuelve `{ data, source: "zernio" | "demo", warning? }`.
 
-- `DEMO_MODE` (`auto | on | off`, ajustable en `/settings`) decide el origen.
-  En `auto` se usa la demo cuando no hay API key, de modo que el dashboard
-  **siempre es navegable** en una máquina recién clonada.
+- El modo de datos (`auto | on | off`, ajustable en `/settings`) decide el
+  origen. En `auto` se usa la demo **sólo mientras no haya API key**: al
+  conectar Zernio el sistema pasa a datos en vivo sin tocar nada más, y una
+  máquina recién clonada sigue siendo navegable.
+- Esa decisión vive en **un único sitio**: `isDemoMode()` en
+  `lib/zernio/config.ts`. La variable `DEMO_MODE` sólo actúa en un sentido
+  (`false` fuerza datos en vivo); `true` es el valor por defecto de
+  `.env.example`, `docker-compose.yml` y CI y significa «demo si no hay
+  credenciales», no «fuerza demo».
+  Motivo: `/api/cron/competitors` y `scripts/ingest-competitors.ts` leían
+  `DEMO_MODE` por su cuenta (`!== "false"`) y se quedaban en demo aunque el
+  dashboard ya estuviera en vivo con Zernio conectado. Ahora los dos llaman a
+  `isDemoMode()`. Para forzar la demo está la opción `on` del panel, que es
+  explícita y no depende del entorno.
 - Si la API real falla (401, 403 sin add-on de Analytics, 429, 5xx) se degrada a
   la demo y se devuelve el motivo en `warning`; la página muestra el dato en vez
   de romperse.

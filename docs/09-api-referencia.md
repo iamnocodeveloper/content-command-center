@@ -396,11 +396,17 @@ Requieren `Authorization: Bearer $CRON_SECRET` cuando la variable está definida
 
 ### `GET /api/cron/competitors`
 
-Domingos 06:00 (hora local). Devuelve el resumen de la ingesta.
+Domingos 06:00 (hora local). Devuelve el resumen de la ingesta. El `mode` sale de
+`isDemoMode()`: `demo` mientras no haya credencial de Zernio, `live` en cuanto la
+haya.
 
 ```json
+// sin credencial de Zernio
 { "mode": "demo", "message": "…", "competitors": 8, "reels": 40,
   "week": "2026-W37", "durationMs": 87 }
+// con Zernio conectado (el pipeline real aún no está implementado, ver docs/06)
+{ "mode": "live", "week": "2026-W37", "competitors": 8, "ingested": 0,
+  "note": "…", "durationMs": 12 }
 ```
 
 ### `POST /api/cron/competitors`

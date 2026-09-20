@@ -173,14 +173,23 @@ export function getDefaultTimezone(): string {
 }
 
 /**
- * El modo demo se controla desde /settings (auto | on | off). En `auto` se
- * activa cuando no hay clave de Zernio, para que el dashboard siempre sea
- * navegable.
+ * El modo demo se controla desde /settings (`auto | on | off`).
+ *
+ * En `auto` manda la credencial: en cuanto hay una API key de Zernio el sistema
+ * pasa a datos en vivo, que es justo lo que se espera al conectar la
+ * integración. No hace falta tocar el entorno ni reiniciar nada.
+ *
+ * `DEMO_MODE` es sólo una señal explícita de un sentido: `DEMO_MODE=false`
+ * fuerza datos en vivo. Un `DEMO_MODE=true` **no** fuerza la demo, porque es el
+ * valor por defecto de `.env.example`, `docker-compose.yml` y CI, y significa
+ * «demo si no hay credenciales». Para forzar la demo está la opción `on` del
+ * panel.
  */
 export function isDemoMode(): boolean {
   const config = getIntegrationConfig();
   if (config.demoMode === "off") return false;
   if (config.demoMode === "on") return true;
+  if (process.env.DEMO_MODE?.trim().toLowerCase() === "false") return false;
   return !config.zernioApiKey;
 }
 

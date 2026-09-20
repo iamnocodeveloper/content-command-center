@@ -157,7 +157,9 @@ sin puntuación final, listo para entrar en el motor de plantillas.
 
 ## Pipeline real de competidores
 
-Hoy el cron sirve la captura semanal de demostración. Para conectarlo de verdad,
+Hoy el cron sirve la captura semanal de demostración **sólo mientras no haya
+credencial de Zernio**. En cuanto la hay responde `mode: "live"` con 0 ingeridos,
+porque el pipeline real todavía no está implementado. Para conectarlo de verdad,
 los pasos (ya enumerados en `app/api/cron/competitors/route.ts`) son:
 
 ```

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { listCompetitors, listReels } from "@/lib/domain/repository";
 import { createSeedReels } from "@/lib/domain/seed/competitors";
 import { assertCronAuthorized } from "@/lib/server/cron-auth";
+import { isDemoMode } from "@/lib/zernio/config";
 import type { CompetitorReel } from "@/lib/domain/types";
 
 export const dynamic = "force-dynamic";
@@ -24,14 +25,17 @@ export async function GET(request: NextRequest) {
 
   const startedAt = Date.now();
   const competitors = await listCompetitors();
-  const isDemo = process.env.DEMO_MODE !== "false";
+  // Una sola definición de «demo» en todo el sistema: la de lib/zernio/config.
+  // Antes este handler leía DEMO_MODE por su cuenta y se quedaba en demo aunque
+  // el resto del dashboard ya estuviera en vivo con Zernio conectado.
+  const isDemo = isDemoMode();
 
   if (isDemo) {
     const reels = createSeedReels();
     return NextResponse.json({
       mode: "demo",
       message:
-        "Modo demo: se sirve la captura semanal ya procesada. Pon DEMO_MODE=false para lanzar el pipeline real.",
+        "Modo demo: se sirve la captura semanal ya procesada. Conecta Zernio en /settings (o define DEMO_MODE=false) para pasar a datos en vivo.",
       competitors: competitors.length,
       reels: reels.length,
       week: reels[0]?.week ?? null,

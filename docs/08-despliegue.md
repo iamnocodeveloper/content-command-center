@@ -46,7 +46,7 @@ Todas son **opcionales**: el panel `/settings` cubre lo mismo. Precedencia:
 | `ZERNIO_PROFILE_ID` | Perfil que agrupa las cuentas | Recomendada |
 | `ZERNIO_DEFAULT_TIMEZONE` | Zona por defecto al programar | No (`America/Mexico_City`) |
 | `ZERNIO_BASE_URL` | Sobrescribir la base de la API | No |
-| `DEMO_MODE` | `true` / `false` | No (`auto`) |
+| `DEMO_MODE` | `false` fuerza datos en vivo; `true` = «demo si no hay credenciales» | No |
 | `CAPTION_PROVIDER` | `heuristic` / `openai` / `anthropic` / `aisa` | No (`heuristic`) |
 | `OPENAI_API_KEY` | Modelo de IA y Whisper | No |
 | `OPENAI_MODEL` | Modelo de OpenAI | No (`gpt-4o-mini`) |
