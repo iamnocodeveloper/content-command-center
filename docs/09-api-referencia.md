@@ -49,11 +49,13 @@ enmascarada y un booleano.
     "demoMode": "auto"
   },
   "ai": {
-    "provider": "openai",
+    "provider": "aisa",
     "openaiApiKey": "sk-…•1234", "openaiApiKeyConfigured": true, "openaiApiKeySource": "file",
     "openaiModel": "gpt-4o-mini",
     "anthropicApiKey": null, "anthropicApiKeyConfigured": false, "anthropicApiKeySource": "unset",
-    "anthropicModel": "claude-sonnet-4-5"
+    "anthropicModel": "claude-sonnet-4-5",
+    "aisaApiKey": "sk-••••••••4f2a", "aisaApiKeyConfigured": true, "aisaApiKeySource": "env",
+    "aisaModel": "gpt-5.4"
   },
   "transcription": { "provider": "mock", "deepgramApiKey": null,
     "deepgramApiKeyConfigured": false, "deepgramApiKeySource": "unset" },
@@ -73,6 +75,7 @@ Zernio. Un campo con **cadena vacía borra** el valor guardado.
 {
   "zernio": { "apiKey": "sk_…", "profileId": "66a1…", "timezone": "America/Bogota", "demoMode": "auto" },
   "ai": { "provider": "anthropic", "anthropicApiKey": "sk-ant-…", "anthropicModel": "claude-sonnet-4-5" },
+  // o con el gateway multi-modelo: { "provider": "aisa", "aisaApiKey": "sk-aisa-…", "aisaModel": "gpt-5.4" }
   "transcription": { "provider": "deepgram", "deepgramApiKey": "…" }
 }
 ```
@@ -92,7 +95,7 @@ Prueba credenciales **sin guardarlas**.
 { "action": "test-zernio", "apiKey": "sk_…", "profileId": "66a1…" }
 // → { ok, message, latencyMs, accountCount, accounts: [...], hint }
 
-// Prueba del modelo de IA
+// Prueba del modelo de IA (provider: heuristic | openai | anthropic | aisa)
 { "action": "test-ai", "provider": "openai", "apiKey": "sk-…", "model": "gpt-4o-mini" }
 // → { ok, provider, model, message, latencyMs, sample }
 ```
@@ -291,8 +294,8 @@ Genera una caption por plataforma (heurística o refinada con IA).
   "hashtags": ["…"], "source": "openai", "captionFull": "…", "note": null }
 ```
 
-`source` es `openai` · `anthropic` · `fallback`. Con `fallback`, `note` explica el
-motivo.
+`source` es `openai` · `anthropic` · `aisa` · `fallback`. Con `fallback`, `note`
+explica el motivo.
 
 ### `POST /api/ai/hooks`
 

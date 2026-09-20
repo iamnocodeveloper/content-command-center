@@ -147,13 +147,14 @@ variaciones), no para la *clasificación*.
 
 ### 4.4 IA: un único punto de entrada con degradación
 
-`lib/services/ai.ts` expone `aiComplete()` sobre OpenAI y Anthropic, y funciones
-de alto nivel (`generateScript`, `generateHookVariants`, `rewriteCaption`) que
-**nunca lanzan**: si el proveedor falla o es `heuristic`, devuelven un resultado
-local válido más un campo `note` explicando el fallback.
+`lib/services/ai.ts` expone `aiComplete()` sobre OpenAI, Anthropic y AIsa, y
+funciones de alto nivel (`generateScript`, `generateHookVariants`,
+`rewriteCaption`) que **nunca lanzan**: si el proveedor falla o es `heuristic`,
+devuelven un resultado local válido más un campo `note` explicando el fallback.
 
 Decisión: la UI nunca debe quedarse sin respuesta por un 429 de un tercero. El
-proveedor por defecto es `heuristic` (plantillas locales, coste cero).
+proveedor por defecto es `heuristic` (plantillas locales, coste cero). AIsa se
+añadió después como gateway multi-modelo; ver 4.15.
 
 ### 4.5 Credenciales: panel + variables de entorno
 
@@ -264,6 +265,35 @@ abierto bajo MIT y cualquiera puede editar el archivo y el script. Lo que
 consigue es que quitarlo sea deliberado y visible, y que *este* proyecto no pueda
 desplegarse sin él. Para exigibilidad legal habría que cambiar la licencia. Ver
 `docs/11-atribucion.md`.
+
+### 4.15 AIsa: un gateway en dos superficies
+
+[AIsa](https://aisa.one/docs) es un gateway compatible con OpenAI
+(`https://api.aisa.one/v1`) que sirve 108 modelos bajo un único token. Se
+integró en dos sitios con ciclos de vida distintos:
+
+- **Entorno del agente (BYOK)** — proveedor `aisa` en
+  `~/.commandcode/providers.json`, con 12 modelos. BYOK sólo acepta
+  **referencias** a la clave (`"$AISA_API_KEY"`): pegar el secreto en crudo se
+  rechaza al parsear. Vive fuera del repositorio, así que no se versiona nunca.
+- **Dashboard** — valor `aisa` de `AiProviderId`, seleccionable en `/settings`
+  igual que OpenAI o Anthropic.
+
+Decisión técnica: AIsa habla el mismo protocolo que OpenAI en
+`/chat/completions`, así que `callOpenAI` y `callAisa` eran el mismo código
+salvo endpoint, clave y modelo. Se extrajo `callOpenAiCompatible()` y los dos
+quedaron como envoltorios de tres líneas. Alternativa descartada: duplicar el
+`fetch`, que deja dos sitios donde arreglar el mismo bug.
+
+Decisión de seguridad: la clave se lee **sólo** de `AISA_API_KEY`. No entra en
+`providers.json` (lo impide el esquema), ni en `.env.example` (va vacía), ni en
+el `settings.json` versionado (cubierto por `.gitignore`). Rotación y alcance de
+la clave en `docs/12-aisa.md`.
+
+Efecto colateral corregido: `/script` y `/scheduler` resolvían la etiqueta del
+modelo con `ai.provider === "openai" ? ai.openaiModel : ai.anthropicModel`, un
+ternario que con un tercer proveedor mostraba el modelo equivocado. Se sustituyó
+por `aiActiveModel(ai)`, que consulta el modelo del proveedor activo.
 
 ---
 

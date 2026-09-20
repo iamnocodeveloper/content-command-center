@@ -47,11 +47,14 @@ Todas son **opcionales**: el panel `/settings` cubre lo mismo. Precedencia:
 | `ZERNIO_DEFAULT_TIMEZONE` | Zona por defecto al programar | No (`America/Mexico_City`) |
 | `ZERNIO_BASE_URL` | Sobrescribir la base de la API | No |
 | `DEMO_MODE` | `true` / `false` | No (`auto`) |
-| `CAPTION_PROVIDER` | `heuristic` / `openai` / `anthropic` | No (`heuristic`) |
+| `CAPTION_PROVIDER` | `heuristic` / `openai` / `anthropic` / `aisa` | No (`heuristic`) |
 | `OPENAI_API_KEY` | Modelo de IA y Whisper | No |
 | `OPENAI_MODEL` | Modelo de OpenAI | No (`gpt-4o-mini`) |
 | `ANTHROPIC_API_KEY` | Modelo de IA | No |
 | `ANTHROPIC_MODEL` | Modelo de Anthropic | No (`claude-sonnet-4-5`) |
+| `AISA_API_KEY` | Modelo de IA vía gateway AIsa | No |
+| `AISA_MODEL` | ID de modelo de AIsa (ver [`12-aisa.md`](./12-aisa.md)) | No (`gpt-5.4`) |
+| `AISA_BASE_URL` | Sobrescribir la raíz de la API de AIsa | No |
 | `TRANSCRIPTION_PROVIDER` | `mock` / `openai` / `deepgram` | No (`mock`) |
 | `DEEPGRAM_API_KEY` | Transcripción con Deepgram | No |
 | `CRON_SECRET` | Protege `/api/cron/*` | **Sí en producción** |
@@ -91,6 +94,8 @@ services:
       CRON_SECRET: ${CRON_SECRET}
       CAPTION_PROVIDER: openai
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AISA_API_KEY: ${AISA_API_KEY}
+      AISA_MODEL: ${AISA_MODEL:-gpt-5.4}
       TZ: America/Mexico_City
     volumes:
       - ccc-data:/app/.data

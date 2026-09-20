@@ -113,10 +113,10 @@ la caption y enviarlo al Programador. El borrador persiste en `localStorage`.
 
 ### `/settings` — Ajustes y conexiones
 
-Conecta Zernio (API key + profile) y el modelo de IA (OpenAI o Anthropic), y
-elige el proveedor de transcripción. Cada tarjeta tiene su botón de **probar
-conexión** antes de guardar y muestra de dónde sale cada credencial (panel o
-variable de entorno).
+Conecta Zernio (API key + profile) y el modelo de IA (OpenAI, Anthropic o
+[AIsa](./12-aisa.md)), y elige el proveedor de transcripción. Cada tarjeta tiene
+su botón de **probar conexión** antes de guardar y muestra de dónde sale cada
+credencial (panel o variable de entorno).
 
 ## Perfiles de uso
 

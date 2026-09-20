@@ -125,8 +125,9 @@ Si publicas con **otro usuario u otro nombre**, actualiza estas tres referencias
    | `ZERNIO_PROFILE_ID` | `66a1f0c2…` |
    | `CRON_SECRET` | una cadena larga y aleatoria |
    | `NEXT_PUBLIC_SITE_URL` | `https://tu-dominio.vercel.app` |
-   | `CAPTION_PROVIDER` | `openai` o `anthropic` (opcional) |
+   | `CAPTION_PROVIDER` | `openai`, `anthropic` o `aisa` (opcional) |
    | `OPENAI_API_KEY` | opcional |
+   | `AISA_API_KEY` | opcional (gateway multi-modelo de [AIsa](../docs/12-aisa.md)) |
 
 3. Deploy. Los cron de `vercel.json` se registran automáticamente.
 

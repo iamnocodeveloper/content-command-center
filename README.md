@@ -77,7 +77,7 @@ Abre **http://localhost:3000**. Arranca en **modo demo**: verás 22 hooks clasif
 Ve a **`/settings`** y pega:
 
 1. **API key de Zernio** (`sk_…`, desde [zernio.com/dashboard/api-keys](https://zernio.com/dashboard/api-keys)) y el **Profile ID** que agrupa tus cuentas. Pulsa *Probar conexión* — llama de verdad a `GET /v1/accounts` antes de guardar.
-2. **Modelo de IA** (OpenAI o Anthropic) para que los guiones, captions y variaciones se escriban con IA. Sin él, el generador heurístico local sigue funcionando.
+2. **Modelo de IA** — OpenAI, Anthropic o **AIsa** (un gateway que sirve 108 modelos con un solo token, incluidos GPT, Claude, Gemini, Grok, DeepSeek y Qwen) para que los guiones, captions y variaciones se escriban con IA. Sin él, el generador heurístico local sigue funcionando.
 
 ---
 
@@ -105,7 +105,7 @@ flowchart TB
     end
 
     subgraph Services["lib/services"]
-        AI["ai.ts<br/><i>OpenAI / Anthropic / heurístico</i>"]
+        AI["ai.ts<br/><i>OpenAI / Anthropic / AIsa / heurístico</i>"]
         CAP["captions.ts"]
         TR["transcription.ts"]
         CAL["calendar-service.ts"]
@@ -114,7 +114,7 @@ flowchart TB
 
     Zernio["☁️ API de Zernio<br/>zernio.com/api/v1"]
     Disk[("💾 .data/settings.json<br/><i>0600</i>")]
-    LLM["☁️ OpenAI · Anthropic"]
+    LLM["☁️ OpenAI · Anthropic · AIsa"]
     Feeds["📡 12 feeds RSS/Atom"]
 
     RSC --> Domain
@@ -171,7 +171,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     A["API de Zernio"] -->|falla o sin credencial| A2["🟡 Datos semilla deterministas"]
-    B["OpenAI / Anthropic"] -->|falla o sin key| B2["🟡 Generador heurístico local"]
+    B["OpenAI / Anthropic / AIsa"] -->|falla o sin key| B2["🟡 Generador heurístico local"]
     C["Whisper / Deepgram"] -->|falla o sin key| C2["🟡 Transcripción simulada"]
     A2 --> D["La UI nunca queda en blanco<br/><i>muestra el motivo en `warning`</i>"]
     B2 --> D
@@ -191,7 +191,7 @@ flowchart LR
 | Gráficas | **Recharts 2** | Área + barras responsivas en Analíticas. |
 | Datos cliente | **TanStack Query 5** | `initialData` desde el servidor y refetch por filtros. |
 | Validación | **Zod 3** | Todos los route handlers validan su body. |
-| IA | **OpenAI · Anthropic · heurístico** | Un único punto de entrada con degradación garantizada. |
+| IA | **OpenAI · Anthropic · AIsa · heurístico** | Un único punto de entrada con degradación garantizada. |
 | Despliegue | **Vercel · Docker · Node** | `output: standalone` para una imagen mínima. |
 
 Cada decisión está razonada en [`CLAUDE.md`](./CLAUDE.md), incluidas las alternativas descartadas.
@@ -239,7 +239,7 @@ Guía completa, cron en UTC y solución de problemas: [`docs/08-despliegue.md`](
 
 | Documento | Contenido |
 |---|---|
-| [`CLAUDE.md`](./CLAUDE.md) | **Empieza aquí.** Stack, arquitectura y las 13 decisiones técnicas con su motivo. |
+| [`CLAUDE.md`](./CLAUDE.md) | **Empieza aquí.** Stack, arquitectura y las 15 decisiones técnicas con su motivo. |
 | [`docs/01-proyecto.md`](./docs/01-proyecto.md) | Visión, alcance y recorrido de usuario por las seis secciones. |
 | [`docs/02-arquitectura.md`](./docs/02-arquitectura.md) | Capas, flujos de datos y frontera servidor/cliente. |
 | [`docs/03-bases-de-datos.md`](./docs/03-bases-de-datos.md) | Modelo de datos completo, store actual y migración a Postgres. |
@@ -251,6 +251,7 @@ Guía completa, cron en UTC y solución de problemas: [`docs/08-despliegue.md`](
 | [`docs/09-api-referencia.md`](./docs/09-api-referencia.md) | Referencia de los 18 endpoints propios. |
 | [`docs/10-publicar-en-github.md`](./docs/10-publicar-en-github.md) | Publicar el repo, revisión de seguridad previa y checklist posterior. |
 | [`docs/11-atribucion.md`](./docs/11-atribucion.md) | El crédito de autoría del sidebar y el verificador que impide quitarlo sin romper el build. |
+| [`docs/12-aisa.md`](./docs/12-aisa.md) | AIsa en las dos superficies: proveedor BYOK del agente y proveedor de IA del dashboard, con el catálogo de modelos y la política de rotación de la clave. |
 
 ---
 

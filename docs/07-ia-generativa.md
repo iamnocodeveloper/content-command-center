@@ -22,9 +22,16 @@ requiere redacción se delega al modelo, pero **siempre** con un fallback local.
 | `heuristic` (defecto) | — local | Nada. Plantillas y reglas. |
 | `openai` | `POST https://api.openai.com/v1/chat/completions` | `OPENAI_API_KEY` |
 | `anthropic` | `POST https://api.anthropic.com/v1/messages` | `ANTHROPIC_API_KEY` |
+| `aisa` | `POST https://api.aisa.one/v1/chat/completions` | `AISA_API_KEY` |
 
-Modelos por defecto: `gpt-4o-mini` y `claude-sonnet-4-5`. Ambos configurables
-desde `/settings`.
+Modelos por defecto: `gpt-4o-mini`, `claude-sonnet-4-5` y `gpt-5.4` (AIsa). Los
+tres configurables desde `/settings`.
+
+AIsa es un **gateway multi-modelo compatible con OpenAI**: un solo token sirve
+108 modelos (GPT, Claude, Gemini, Grok, DeepSeek, Qwen, Kimi, MiniMax, GLM…). Se
+eligió el protocolo OpenAI (`/chat/completions`) porque es el que cubre más
+modelos; el endpoint se sobrescribe con `AISA_BASE_URL`. Detalle completo en
+[`12-aisa.md`](./12-aisa.md).
 
 Se elige en `/settings` → tarjeta **Modelo de IA**. El botón *Probar modelo* hace
 una llamada real de 60 tokens y muestra la latencia y una muestra de la respuesta,
@@ -38,11 +45,15 @@ aiComplete(messages, { json?, maxTokens?, temperature? })
   → { text, provider, model }
 ```
 
-- Añade `response_format: { type: "json_object" }` en OpenAI cuando `json: true`
-  (Anthropic no lo soporta: se le pide el JSON en el prompt).
+- Añade `response_format: { type: "json_object" }` en OpenAI **y en AIsa** cuando
+  `json: true` (Anthropic no lo soporta: se le pide el JSON en el prompt).
 - Timeout de 60 s (`AbortSignal.timeout`).
 - Lanza `AiUnavailableError` con un mensaje útil si falta la clave o el
   proveedor responde con error.
+
+OpenAI y AIsa comparten `callOpenAiCompatible()`, porque hablan el mismo
+protocolo; sólo cambian la raíz, la clave y el modelo. Añadir otro proveedor
+OpenAI-compatible es una función de tres líneas.
 
 ## Funciones de alto nivel
 
@@ -145,12 +156,17 @@ curl -X POST http://localhost:3000/api/ai/script \
 ## Añadir un proveedor nuevo
 
 1. Implementa el `call…` correspondiente en `lib/services/ai.ts` y enrútalo desde
-   `aiComplete`.
+   `aiComplete`. Si habla el protocolo OpenAI, reutiliza
+   `callOpenAiCompatible()` en lugar de duplicar el `fetch`.
 2. Añade el valor a `AiProviderId` en `lib/server/settings-store.ts` y su clave a
-   `AppSettings.ai`.
+   `AppSettings.ai` (recuerda `DEFAULT_SETTINGS`: el tipo exige el modelo por
+   defecto).
 3. Extiende `getAiConfig()` en `lib/zernio/config.ts` con la nueva credencial y su
    `ready`.
 4. Añade la opción al `Select` de `components/settings/connections-panel.tsx` y el
-   campo de clave con `SecretInput`.
+   campo de clave con `SecretInput`. Actualiza también el `SettingsPayload` local
+   del panel y el Zod de `app/api/settings/route.ts`.
+5. Añade el modelo a `aiModelForProvider()` para que las etiquetas de
+   `/script` y `/scheduler` muestren el modelo correcto.
 
 Las funciones de alto nivel no cambian: siguen llamando a `aiComplete`.
