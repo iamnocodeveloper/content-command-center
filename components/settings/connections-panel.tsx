@@ -34,7 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type SettingSource = "file" | "env" | "unset";
-type AiProviderId = "heuristic" | "openai" | "anthropic";
+type AiProviderId = "heuristic" | "openai" | "anthropic" | "aisa";
 type TranscriptionProviderId = "mock" | "openai" | "deepgram";
 
 interface SettingsPayload {
@@ -58,6 +58,10 @@ interface SettingsPayload {
     anthropicApiKeyConfigured: boolean;
     anthropicApiKeySource: SettingSource;
     anthropicModel: string;
+    aisaApiKey: string | null;
+    aisaApiKeyConfigured: boolean;
+    aisaApiKeySource: SettingSource;
+    aisaModel: string;
   };
   transcription: {
     provider: TranscriptionProviderId;
@@ -209,6 +213,8 @@ export function ConnectionsPanel() {
   const [openaiModel, setOpenaiModel] = React.useState("");
   const [anthropicKey, setAnthropicKey] = React.useState("");
   const [anthropicModel, setAnthropicModel] = React.useState("");
+  const [aisaKey, setAisaKey] = React.useState("");
+  const [aisaModel, setAisaModel] = React.useState("");
   const [aiTest, setAiTest] = React.useState<TestState>({ status: "idle" });
 
   const [trProvider, setTrProvider] =
@@ -230,6 +236,7 @@ export function ConnectionsPanel() {
     setAiProvider(payload.ai.provider);
     setOpenaiModel(payload.ai.openaiModel);
     setAnthropicModel(payload.ai.anthropicModel);
+    setAisaModel(payload.ai.aisaModel);
     setTrProvider(payload.transcription.provider);
   }, []);
 
@@ -270,6 +277,7 @@ export function ConnectionsPanel() {
       if (section === "ai") {
         setOpenaiKey("");
         setAnthropicKey("");
+        setAisaKey("");
       }
       if (section === "transcription") setDeepgramKey("");
 
@@ -325,8 +333,21 @@ export function ConnectionsPanel() {
   async function testAi() {
     const provider = aiProvider;
     const apiKey =
-      provider === "openai" ? openaiKey : provider === "anthropic" ? anthropicKey : undefined;
-    const model = provider === "openai" ? openaiModel : anthropicModel;
+      provider === "openai"
+        ? openaiKey
+        : provider === "anthropic"
+          ? anthropicKey
+          : provider === "aisa"
+            ? aisaKey
+            : undefined;
+    const model =
+      provider === "openai"
+        ? openaiModel
+        : provider === "anthropic"
+          ? anthropicModel
+          : provider === "aisa"
+            ? aisaModel
+            : "";
 
     setAiTest({ status: "running", message: "Probando el modelo…" });
     try {
@@ -589,6 +610,7 @@ export function ConnectionsPanel() {
                 </SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
                 <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
+                <SelectItem value="aisa">AIsa (gateway multi-modelo)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -649,6 +671,44 @@ export function ConnectionsPanel() {
             </div>
           ) : null}
 
+          {aiProvider === "aisa" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="aisa-key">
+                  AIsa API key
+                  <SourceBadge source={settings.ai.aisaApiKeySource} />
+                </Label>
+                <SecretInput
+                  id="aisa-key"
+                  value={aisaKey}
+                  onChange={setAisaKey}
+                  configured={settings.ai.aisaApiKeyConfigured}
+                  placeholder={settings.ai.aisaApiKey ?? "sk-aisa-…"}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Formato sk-aisa-…. La consume el gateway https://api.aisa.one/v1
+                  (compatible con OpenAI) y se factura contra el saldo de tu cuenta.
+                </p>
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="aisa-model">Modelo</Label>
+                <Input
+                  id="aisa-model"
+                  value={aisaModel}
+                  onChange={(event) => setAisaModel(event.target.value)}
+                  placeholder="gpt-5.4"
+                  className="font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">
+                  IDs de AIsa, p. ej. <span className="font-mono">gpt-5.4</span>,{" "}
+                  <span className="font-mono">claude-opus-4-8</span>,{" "}
+                  <span className="font-mono">deepseek-v4-flash</span> o{" "}
+                  <span className="font-mono">qwen3.7-max</span>. Usa el ID exacto.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           {aiProvider === "heuristic" ? (
             <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -684,6 +744,8 @@ export function ConnectionsPanel() {
                     openaiModel,
                     ...(anthropicKey ? { anthropicApiKey: anthropicKey } : {}),
                     anthropicModel,
+                    ...(aisaKey ? { aisaApiKey: aisaKey } : {}),
+                    aisaModel,
                   },
                   "Modelo de IA actualizado",
                 )

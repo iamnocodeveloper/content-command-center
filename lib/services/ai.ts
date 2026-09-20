@@ -1,4 +1,4 @@
-import { getAiConfig, type AiConfig } from "@/lib/zernio/config";
+import { AISA_BASE_URL, getAiConfig, type AiConfig } from "@/lib/zernio/config";
 import type { AiProviderId } from "@/lib/server/settings-store";
 import { NICHE_LABELS, type Niche } from "@/lib/domain/types";
 
@@ -8,7 +8,11 @@ import { NICHE_LABELS, type Niche } from "@/lib/domain/types";
  * Un único punto de entrada (`aiComplete`) sobre los proveedores soportados:
  *  - `openai`    · POST https://api.openai.com/v1/chat/completions
  *  - `anthropic` · POST https://api.anthropic.com/v1/messages
+ *  - `aisa`      · POST https://api.aisa.one/v1/chat/completions (protocolo OpenAI)
  *  - `heuristic` · generador local determinista, sin red ni coste
+ *
+ * AIsa es un gateway compatible con OpenAI: comparte cliente con `openai`
+ * (`callOpenAiCompatible`) y sólo cambia endpoint y clave.
  *
  * Toda función de alto nivel degrada al heurístico si el proveedor falla o no
  * está configurado, de modo que la UI nunca se queda sin respuesta.
@@ -44,9 +48,33 @@ export function aiProviderLabel(provider: AiProviderId, model?: string): string 
       return model ? `OpenAI · ${model}` : "OpenAI";
     case "anthropic":
       return model ? `Anthropic · ${model}` : "Anthropic";
+    case "aisa":
+      return model ? `AIsa · ${model}` : "AIsa";
     default:
       return "Heurístico (local)";
   }
+}
+
+/** Modelo configurado para un proveedor concreto. */
+export function aiModelForProvider(
+  config: AiConfig,
+  provider: AiProviderId,
+): string {
+  switch (provider) {
+    case "openai":
+      return config.openaiModel;
+    case "anthropic":
+      return config.anthropicModel;
+    case "aisa":
+      return config.aisaModel;
+    default:
+      return "";
+  }
+}
+
+/** Modelo del proveedor activo, ya resuelto para las etiquetas de la UI. */
+export function aiActiveModel(config: AiConfig): string | undefined {
+  return aiModelForProvider(config, config.provider) || undefined;
 }
 
 /**
@@ -61,7 +89,7 @@ export async function aiComplete(
 
   if (config.provider === "heuristic") {
     throw new AiUnavailableError(
-      "El proveedor de IA es «heurístico»: configura OpenAI o Anthropic en Ajustes.",
+      "El proveedor de IA es «heurístico»: configura OpenAI, Anthropic o AIsa en Ajustes.",
     );
   }
 
@@ -73,6 +101,14 @@ export async function aiComplete(
     return { text, provider: "openai", model: config.openaiModel };
   }
 
+  if (config.provider === "aisa") {
+    if (!config.aisaApiKey) {
+      throw new AiUnavailableError("Falta la API key de AIsa.");
+    }
+    const text = await callAisa(config, messages, options);
+    return { text, provider: "aisa", model: config.aisaModel };
+  }
+
   if (!config.anthropicApiKey) {
     throw new AiUnavailableError("Falta la API key de Anthropic.");
   }
@@ -80,30 +116,39 @@ export async function aiComplete(
   return { text, provider: "anthropic", model: config.anthropicModel };
 }
 
-async function callOpenAI(
-  config: AiConfig,
-  messages: AiMessage[],
-  options: AiCompleteOptions,
-): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+/**
+ * Cliente común a todo endpoint compatible con el protocolo OpenAI
+ * (`POST {baseURL}/chat/completions`). Lo comparten OpenAI y AIsa: sólo cambian
+ * la raíz, la clave y el modelo.
+ */
+async function callOpenAiCompatible(input: {
+  baseURL: string;
+  apiKey: string;
+  model: string;
+  /** Nombre del proveedor, sólo para los mensajes de error. */
+  label: string;
+  messages: AiMessage[];
+  options: AiCompleteOptions;
+}): Promise<string> {
+  const response = await fetch(`${input.baseURL}/chat/completions`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${config.openaiApiKey}`,
+      Authorization: `Bearer ${input.apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: config.openaiModel,
-      messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 1200,
-      ...(options.json ? { response_format: { type: "json_object" } } : {}),
+      model: input.model,
+      messages: input.messages,
+      temperature: input.options.temperature ?? 0.7,
+      max_tokens: input.options.maxTokens ?? 1200,
+      ...(input.options.json ? { response_format: { type: "json_object" } } : {}),
     }),
-    signal: options.signal ?? AbortSignal.timeout(60_000),
+    signal: input.options.signal ?? AbortSignal.timeout(60_000),
   });
 
   if (!response.ok) {
     throw new AiUnavailableError(
-      `OpenAI respondió ${response.status}: ${await safeErrorText(response)}`,
+      `${input.label} respondió ${response.status}: ${await safeErrorText(response)}`,
     );
   }
 
@@ -111,8 +156,40 @@ async function callOpenAI(
     choices?: Array<{ message?: { content?: string } }>;
   };
   const text = payload.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new AiUnavailableError("OpenAI devolvió una respuesta vacía.");
+  if (!text) {
+    throw new AiUnavailableError(`${input.label} devolvió una respuesta vacía.`);
+  }
   return text;
+}
+
+async function callOpenAI(
+  config: AiConfig,
+  messages: AiMessage[],
+  options: AiCompleteOptions,
+): Promise<string> {
+  return callOpenAiCompatible({
+    baseURL: "https://api.openai.com/v1",
+    apiKey: config.openaiApiKey ?? "",
+    model: config.openaiModel,
+    label: "OpenAI",
+    messages,
+    options,
+  });
+}
+
+async function callAisa(
+  config: AiConfig,
+  messages: AiMessage[],
+  options: AiCompleteOptions,
+): Promise<string> {
+  return callOpenAiCompatible({
+    baseURL: AISA_BASE_URL,
+    apiKey: config.aisaApiKey ?? "",
+    model: config.aisaModel,
+    label: "AIsa",
+    messages,
+    options,
+  });
 }
 
 async function callAnthropic(
@@ -233,9 +310,7 @@ export async function testAiConnection(input: {
   }
 
   const config = getAiConfig();
-  const model =
-    input.model?.trim() ||
-    (input.provider === "openai" ? config.openaiModel : config.anthropicModel);
+  const model = input.model?.trim() || aiModelForProvider(config, input.provider);
 
   const probe: AiMessage[] = [
     {
@@ -248,9 +323,14 @@ export async function testAiConnection(input: {
   const overridden: AiConfig = {
     ...config,
     provider: input.provider,
+    ready: true,
     ...(input.provider === "openai"
-      ? { openaiApiKey: apiKey, openaiModel: model, ready: true }
-      : { anthropicApiKey: apiKey, anthropicModel: model, ready: true }),
+      ? { openaiApiKey: apiKey, openaiModel: model }
+      : {}),
+    ...(input.provider === "anthropic"
+      ? { anthropicApiKey: apiKey, anthropicModel: model }
+      : {}),
+    ...(input.provider === "aisa" ? { aisaApiKey: apiKey, aisaModel: model } : {}),
   };
 
   const startedAt = Date.now();
@@ -258,7 +338,9 @@ export async function testAiConnection(input: {
     const text =
       input.provider === "openai"
         ? await callOpenAI(overridden, probe, { maxTokens: 60, temperature: 0 })
-        : await callAnthropic(overridden, probe, { maxTokens: 60, temperature: 0 });
+        : input.provider === "aisa"
+          ? await callAisa(overridden, probe, { maxTokens: 60, temperature: 0 })
+          : await callAnthropic(overridden, probe, { maxTokens: 60, temperature: 0 });
 
     return {
       ok: true,
@@ -295,6 +377,13 @@ export async function testConfiguredAi(): Promise<AiTestResult> {
       provider: "anthropic",
       apiKey: config.anthropicApiKey,
       model: config.anthropicModel,
+    });
+  }
+  if (config.provider === "aisa") {
+    return testAiConnection({
+      provider: "aisa",
+      apiKey: config.aisaApiKey,
+      model: config.aisaModel,
     });
   }
   return testAiConnection({ provider: "heuristic" });

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/page-header";
 import { ScriptStudio, type HookOption } from "@/components/script/script-studio";
 import { listHooks } from "@/lib/domain/repository";
-import { aiProviderLabel } from "@/lib/services/ai";
+import { aiActiveModel, aiProviderLabel } from "@/lib/services/ai";
 import { formatCompact } from "@/lib/utils";
 import { getAiConfig } from "@/lib/zernio/config";
 
@@ -37,10 +37,7 @@ export default async function ScriptPage() {
 
       <ScriptStudio
         hookSuggestions={suggestions}
-        aiLabel={aiProviderLabel(
-          ai.provider,
-          ai.provider === "openai" ? ai.openaiModel : ai.anthropicModel,
-        )}
+        aiLabel={aiProviderLabel(ai.provider, aiActiveModel(ai))}
         aiReady={ai.ready}
       />
     </>

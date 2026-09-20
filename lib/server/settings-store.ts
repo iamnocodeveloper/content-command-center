@@ -26,7 +26,7 @@ import { join } from "node:path";
  */
 
 export type SettingSource = "file" | "env" | "unset";
-export type AiProviderId = "heuristic" | "openai" | "anthropic";
+export type AiProviderId = "heuristic" | "openai" | "anthropic" | "aisa";
 export type TranscriptionProviderId = "mock" | "openai" | "deepgram";
 export type DemoModeSetting = "auto" | "on" | "off";
 
@@ -43,6 +43,8 @@ export interface AppSettings {
     openaiModel: string;
     anthropicApiKey?: string;
     anthropicModel: string;
+    aisaApiKey?: string;
+    aisaModel: string;
   };
   transcription: {
     provider: TranscriptionProviderId;
@@ -56,6 +58,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     provider: "heuristic",
     openaiModel: "gpt-4o-mini",
     anthropicModel: "claude-sonnet-4-5",
+    aisaModel: "gpt-5.4",
   },
   transcription: { provider: "mock" },
 };

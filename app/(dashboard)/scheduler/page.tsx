@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/page-header";
 import { Scheduler } from "@/components/scheduler/scheduler";
 import { getAccounts } from "@/lib/domain/zernio-gateway";
-import { aiProviderLabel } from "@/lib/services/ai";
+import { aiActiveModel, aiProviderLabel } from "@/lib/services/ai";
 import { getAiConfig, getDefaultTimezone, isDemoMode } from "@/lib/zernio/config";
 
 export const metadata: Metadata = {
@@ -30,10 +30,7 @@ export default async function SchedulerPage() {
         accounts={accounts.data}
         defaultTimezone={getDefaultTimezone()}
         demoSafe={isDemoMode()}
-        aiLabel={aiProviderLabel(
-          ai.provider,
-          ai.provider === "openai" ? ai.openaiModel : ai.anthropicModel,
-        )}
+        aiLabel={aiProviderLabel(ai.provider, aiActiveModel(ai))}
         aiReady={ai.ready}
       />
     </>

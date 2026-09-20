@@ -34,11 +34,13 @@ const saveSchema = z.object({
     .optional(),
   ai: z
     .object({
-      provider: z.enum(["heuristic", "openai", "anthropic"]).optional(),
+      provider: z.enum(["heuristic", "openai", "anthropic", "aisa"]).optional(),
       openaiApiKey: z.string().optional(),
       openaiModel: z.string().optional(),
       anthropicApiKey: z.string().optional(),
       anthropicModel: z.string().optional(),
+      aisaApiKey: z.string().optional(),
+      aisaModel: z.string().optional(),
     })
     .optional(),
   transcription: z
@@ -57,7 +59,7 @@ const actionSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("test-ai"),
-    provider: z.enum(["heuristic", "openai", "anthropic"]),
+    provider: z.enum(["heuristic", "openai", "anthropic", "aisa"]),
     apiKey: z.string().optional(),
     model: z.string().optional(),
   }),
@@ -103,6 +105,10 @@ function buildStatusPayload() {
     anthropicApiKeyConfigured: boolean;
     anthropicApiKeySource: SettingSource;
     anthropicModel: string;
+    aisaApiKey: string | null;
+    aisaApiKeyConfigured: boolean;
+    aisaApiKeySource: SettingSource;
+    aisaModel: string;
   } = {
     provider: ai.provider,
     openaiApiKey: maskSecret(ai.openaiApiKey),
@@ -113,6 +119,10 @@ function buildStatusPayload() {
     anthropicApiKeyConfigured: Boolean(ai.anthropicApiKey),
     anthropicApiKeySource: ai.anthropicApiKeySource,
     anthropicModel: ai.anthropicModel,
+    aisaApiKey: maskSecret(ai.aisaApiKey),
+    aisaApiKeyConfigured: Boolean(ai.aisaApiKey),
+    aisaApiKeySource: ai.aisaApiKeySource,
+    aisaModel: ai.aisaModel,
   };
 
   const transcriptionSection = {

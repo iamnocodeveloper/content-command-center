@@ -20,6 +20,14 @@ import {
 export const ZERNIO_BASE_URL =
   process.env.ZERNIO_BASE_URL?.replace(/\/$/, "") ?? "https://zernio.com/api/v1";
 
+/**
+ * Raíz de la API de AIsa. Es compatible con el protocolo OpenAI
+ * (`POST {base}/chat/completions`), por lo que se reutiliza el mismo cliente
+ * que OpenAI cambiando sólo el endpoint y la clave.
+ */
+export const AISA_BASE_URL =
+  process.env.AISA_BASE_URL?.replace(/\/$/, "") ?? "https://api.aisa.one/v1";
+
 export interface IntegrationConfig {
   zernioApiKey?: string;
   zernioApiKeySource: SettingSource;
@@ -38,6 +46,9 @@ export interface AiConfig {
   anthropicApiKey?: string;
   anthropicApiKeySource: SettingSource;
   anthropicModel: string;
+  aisaApiKey?: string;
+  aisaApiKeySource: SettingSource;
+  aisaModel: string;
   /** true cuando el proveedor elegido tiene credencial utilizable. */
   ready: boolean;
 }
@@ -85,6 +96,7 @@ export function getAiConfig(): AiConfig {
     settings.ai.anthropicApiKey,
     process.env.ANTHROPIC_API_KEY,
   );
+  const aisaKey = resolveValue(settings.ai.aisaApiKey, process.env.AISA_API_KEY);
 
   const provider = settings.ai.provider;
   const ready =
@@ -92,7 +104,9 @@ export function getAiConfig(): AiConfig {
       ? true
       : provider === "openai"
         ? Boolean(openaiKey.value)
-        : Boolean(anthropicKey.value);
+        : provider === "anthropic"
+          ? Boolean(anthropicKey.value)
+          : Boolean(aisaKey.value);
 
   return {
     provider,
@@ -108,6 +122,9 @@ export function getAiConfig(): AiConfig {
       settings.ai.anthropicModel ||
       process.env.ANTHROPIC_MODEL ||
       "claude-sonnet-4-5",
+    aisaApiKey: aisaKey.value,
+    aisaApiKeySource: aisaKey.source,
+    aisaModel: settings.ai.aisaModel || process.env.AISA_MODEL || "gpt-5.4",
     ready,
   };
 }
