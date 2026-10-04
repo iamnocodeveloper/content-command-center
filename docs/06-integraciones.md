@@ -125,6 +125,41 @@ permanente.
 `customMedia` permite enviar un archivo distinto a una plataforma concreta dentro
 del mismo post.
 
+#### Cómo lo usa el Programador
+
+- `POST /api/media/presign` (`app/api/media/presign/route.ts`) firma la subida en
+  el servidor; **el binario no pasa por el dashboard**: el navegador hace el `PUT`
+  directo al storage desde `lib/client/media-upload.ts` (XHR, con progreso).
+  Requiere credencial de Zernio; en modo demo solo se admiten URLs públicas.
+- El Programador acepta **archivos del equipo**, **URLs públicas** y **láminas del
+  estudio de Carruseles** (se leen de su IndexedDB y se suben igual al programar).
+- `type` por elemento: `image` | `video` | `gif` | `document` (se deduce del MIME;
+  `application/octet-stream` se rechaza, así que se infiere de la extensión).
+
+#### Tipo de publicación
+
+El tipo se **infiere del media** casi siempre; solo Instagram y Facebook aceptan
+`platformSpecificData.contentType` (`lib/zernio/formats.ts`):
+
+| Plataforma | Selector | Cómo se traduce |
+|---|---|---|
+| Instagram | Automático · Carrusel · Historia | Automático infiere: 1 imagen→publicación · 1 vídeo→Reel · ≥2 items→carrusel · Historia→`contentType:"story"` |
+| Facebook | Publicación · Reel · Historia | feed/multi-imagen inferidos · Reel→`contentType:"reel"` · Historia→`contentType:"story"` |
+| TikTok | Automático · Vídeo · Carrusel de fotos | derivado del media + `tiktokSettings.media_type` (un solo vídeo o varias imágenes, sin mezclar) |
+
+#### TikTok (`tiktokSettings`)
+
+TikTok **exige** ajustes en cada post; sin ellos Zernio rechaza la publicación. El
+Programador los envía siempre que haya una cuenta TikTok seleccionada:
+
+- `privacy_level` — se puebla desde `GET /v1/accounts/{accountId}/tiktok/creator-info`
+  (`/api/tiktok/creator-info`); por defecto `PUBLIC_TO_EVERYONE`.
+- `allow_comment`, `allow_duet`, `allow_stitch` (los dos últimos solo en vídeo).
+- `content_preview_confirmed` y `express_consent_given` en `true` (requisito legal
+  de TikTok).
+- En carrusel de fotos: `media_type: "photo"` y `description` (copy largo, hasta
+  4000 caracteres).
+
 ---
 
 ## Transcripción

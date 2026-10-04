@@ -65,9 +65,11 @@ export interface ZernioAccount {
   avatarUrl?: string;
 }
 
+export type MediaType = "image" | "video" | "gif" | "document";
+
 export interface MediaItem {
   url: string;
-  type?: "image" | "video" | "gif" | "document";
+  type?: MediaType;
   thumbnail?: string;
   altText?: string;
 }
@@ -91,6 +93,11 @@ export interface CreatePostInput {
   /** Sólo texto; Zernio lo guarda como borrador. */
   isDraft?: boolean;
   firstComment?: string;
+  /**
+   * Ajustes de TikTok aplicados a cada entrada `tiktok` del request.
+   * TikTok los exige en todo post (privacidad, interacciones y consentimientos).
+   */
+  tiktokSettings?: Record<string, unknown>;
 }
 
 export interface ZernioPost {
@@ -105,6 +112,8 @@ export interface ZernioPost {
     accountId?: string;
     status: string;
     platformPostUrl?: string;
+    /** Presente cuando esa plataforma falla (respuesta 207 en `publishNow`). */
+    errorMessage?: string;
   }>;
   mediaItems?: MediaItem[];
   createdAt?: string;
@@ -233,6 +242,31 @@ export interface MediaPresignResponse {
   publicUrl: string;
   key: string;
   expiresIn: number;
+}
+
+/**
+ * GET /v1/accounts/{accountId}/tiktok/creator-info
+ * `privacyLevels` son los únicos valores que acepta TikTok para esa cuenta.
+ */
+export interface TikTokCreatorInfoResponse {
+  creator?: {
+    nickname?: string;
+    isVerified?: boolean;
+    canPostMore?: boolean;
+  };
+  privacyLevels?: Array<{ value: string; label: string }>;
+  postingLimits?: {
+    maxVideoDurationSec?: number;
+    interactionSettings?: Record<
+      string,
+      { enabled: boolean; required: boolean; default: boolean; label?: string }
+    >;
+  };
+  commercialContentTypes?: Array<{
+    value: string;
+    label: string;
+    requires?: string[];
+  }>;
 }
 
 export interface BestTimeToPostSlot {

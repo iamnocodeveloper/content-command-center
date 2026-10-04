@@ -43,6 +43,17 @@ export async function getConnectUrl(
 }
 
 /**
+ * GET /v1/accounts/{accountId}/tiktok/creator-info
+ * Devuelve los `privacyLevels` y los toggles de interacción que acepta la
+ * cuenta, que son los únicos valores válidos al publicar en TikTok.
+ */
+export async function getTikTokCreatorInfo(accountId: string) {
+  return zernioFetch<import("@/lib/zernio/types").TikTokCreatorInfoResponse>(
+    `/accounts/${accountId}/tiktok/creator-info`,
+  );
+}
+
+/**
  * GET /v1/accounts/follower-stats
  * El seguimiento de seguidores requiere el add-on de Analytics en Zernio.
  */

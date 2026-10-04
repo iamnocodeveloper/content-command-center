@@ -31,6 +31,7 @@ export async function createPost(
   if (input.scheduledFor) body.scheduledFor = input.scheduledFor;
   if (input.publishNow) body.publishNow = true;
   if (input.isDraft) body.isDraft = true;
+  if (input.tiktokSettings) body.tiktokSettings = input.tiktokSettings;
 
   const { post } = await zernioFetch<{ post: ZernioPost }>("/posts", {
     method: "POST",

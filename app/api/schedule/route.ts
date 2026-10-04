@@ -8,32 +8,42 @@ import { getDefaultTimezone } from "@/lib/zernio/config";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const schema = z.object({
-  content: z.string().min(1, "El contenido no puede estar vacío."),
-  /** `HH:mm` en formato de 24 h, junto con `date`. */
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (YYYY-MM-DD).").optional(),
-  time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida (HH:mm).").optional(),
-  timezone: z.string().optional(),
-  publishNow: z.boolean().optional(),
-  isDraft: z.boolean().optional(),
-  firstComment: z.string().optional(),
-  mediaItems: z
-    .array(
-      z.object({
-        url: z.string().url(),
-        type: z.enum(["image", "video", "gif", "document"]).optional(),
-      }),
-    )
-    .optional(),
-  platforms: z
-    .array(
-      z.object({
-        platform: z.enum(ZERNIO_PLATFORMS),
-        accountId: z.string().min(1),
-      }),
-    )
-    .min(1, "Selecciona al menos una cuenta destino."),
-});
+const schema = z
+  .object({
+    /** Opcional cuando hay `mediaItems` (Instagram, TikTok y YouTube exigen media). */
+    content: z.string().default(""),
+    /** `HH:mm` en formato de 24 h, junto con `date`. */
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (YYYY-MM-DD).").optional(),
+    time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida (HH:mm).").optional(),
+    timezone: z.string().optional(),
+    publishNow: z.boolean().optional(),
+    isDraft: z.boolean().optional(),
+    firstComment: z.string().optional(),
+    mediaItems: z
+      .array(
+        z.object({
+          url: z.string().url(),
+          type: z.enum(["image", "video", "gif", "document"]).optional(),
+        }),
+      )
+      .optional(),
+    platforms: z
+      .array(
+        z.object({
+          platform: z.enum(ZERNIO_PLATFORMS),
+          accountId: z.string().min(1),
+          /** Opciones por plataforma/cuenta: `contentType` (story/reel), etc. */
+          platformSpecificData: z.record(z.unknown()).optional(),
+        }),
+      )
+      .min(1, "Selecciona al menos una cuenta destino."),
+    /** Ajustes de TikTok; la API los exige en todo post a esa plataforma. */
+    tiktokSettings: z.record(z.unknown()).optional(),
+  })
+  .refine((data) => data.content.trim().length > 0 || (data.mediaItems?.length ?? 0) > 0, {
+    message: "Añade contenido o al menos un archivo multimedia.",
+    path: ["content"],
+  });
 
 /**
  * POST /api/schedule
@@ -72,6 +82,7 @@ export async function POST(request: NextRequest) {
       platforms: platforms.map((p) => ({
         platform: p.platform,
         accountId: p.accountId,
+        platformSpecificData: p.platformSpecificData,
       })),
       scheduledFor,
       timezone: rest.timezone ?? getDefaultTimezone(),
@@ -79,6 +90,7 @@ export async function POST(request: NextRequest) {
       isDraft: rest.isDraft,
       firstComment: rest.firstComment,
       mediaItems: rest.mediaItems,
+      tiktokSettings: rest.tiktokSettings,
     });
 
     return NextResponse.json(result, { status: 201 });
