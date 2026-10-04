@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:carousel": "tsx --test scripts/carousel.test.ts",
     "verify:attribution": "node scripts/verify-attribution.mjs",
     "verify:svg": "node scripts/validate-svg.mjs docs/assets/hero.svg docs/assets/secciones.svg",
     "check": "npm run typecheck && npm run lint && npm run verify:attribution && npm run verify:svg",

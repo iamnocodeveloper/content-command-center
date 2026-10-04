@@ -4,6 +4,7 @@ import {
   Film,
   Flame,
   Lightbulb,
+  Images,
   Plug,
   Radar,
   Send,
@@ -58,6 +59,12 @@ export const NAV_ITEMS: NavItem[] = [
 
 /** Secciones de apoyo referenciadas por las seis principales. */
 export const SECONDARY_NAV_ITEMS: NavItem[] = [
+  {
+    href: "/carousels",
+    label: "Carruseles IA",
+    description: "De la referencia a imágenes completas con tu marca",
+    icon: Images,
+  },
   {
     href: "/script",
     label: "Estudio de guiones",

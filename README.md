@@ -26,6 +26,10 @@ Construido sobre la [API de Zernio](https://docs.zernio.com) · Next.js 15 · Ty
 
 </div>
 
+## Carruseles IA
+
+Nuevo estudio en `/carousels`: guarda tu identidad visual, sube un carrusel de referencia o escribe un tema, revisa el contenido adaptado y genera imágenes completas con la API de OpenAI. Incluye regeneración por lámina, formato 4:5, descarga ZIP y copias de seguridad del proyecto. Configura tu API key desde el propio estudio o desde Ajustes. [Guía de uso y límites](./docs/13-carruseles.md).
+
 ---
 
 ## ⚡ Respuestas rápidas
